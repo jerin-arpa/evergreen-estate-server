@@ -33,13 +33,42 @@ async function run() {
         // await client.connect();
 
         const propertiesCollection = client.db("evergreenDb").collection("properties");
+        const reviewCollection = client.db("evergreenDb").collection("review");
         const userCollection = client.db("evergreenDb").collection("users");
         const wishlistCollection = client.db("evergreenDb").collection("wishlist");
 
 
         // Property related api
+        // Create data
+        app.post('/properties', async (req, res) => {
+            const newProperty = req.body;
+            console.log(newProperty);
+            const result = await propertiesCollection.insertOne(newProperty);
+            res.send(result);
+        })
+
+
+        // Read date
         app.get('/properties', async (req, res) => {
             const result = await propertiesCollection.find().toArray();
+            res.send(result);
+        })
+
+
+
+        // Review related api
+        // Create Request food data
+        app.post('/review', async (req, res) => {
+            const newPropertyReview = req.body;
+            console.log(newPropertyReview);
+            const result = await reviewCollection.insertOne(newPropertyReview);
+            res.send(result);
+        })
+
+        // Read Request Food Data
+        app.get('/review', async (req, res) => {
+            const cursor = reviewCollection.find();
+            const result = await cursor.toArray();
             res.send(result);
         })
 
@@ -104,10 +133,29 @@ async function run() {
         // })
 
 
-        // wishlist collection
+        // wishlist related api
         app.post('/wishlist', async (req, res) => {
             const wishlistItem = req.body;
             const result = await wishlistCollection.insertOne(wishlistItem);
+            res.send(result);
+        })
+
+
+        // Read wishlist Data
+        app.get('/wishlist', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const cursor = wishlistCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+
+        // Delete wishlist Data
+        app.delete('/wishlist/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await wishlistCollection.deleteOne(query);
             res.send(result);
         })
 
