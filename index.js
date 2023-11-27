@@ -32,6 +32,84 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
 
+        const propertiesCollection = client.db("evergreenDb").collection("properties");
+        const userCollection = client.db("evergreenDb").collection("users");
+        const wishlistCollection = client.db("evergreenDb").collection("wishlist");
+
+
+        // Property related api
+        app.get('/properties', async (req, res) => {
+            const result = await propertiesCollection.find().toArray();
+            res.send(result);
+        })
+
+
+        // Users related Api
+        app.get('/users', async (req, res) => {
+            const result = await userCollection.find().toArray();
+            res.send(result);
+        })
+
+
+        // app.get('/users/admin/:email', async (req, res) => {
+        //     const email = req.params.email;
+        //     if (email !== req.decoded.email) {
+        //         return res.status(403).send({ message: 'Forbidden access' })
+        //     }
+
+        //     const query = { email: email };
+        //     const user = await userCollection.findOne(query);
+        //     let admin = false;
+        //     if (user) {
+        //         admin = user?.role === 'admin';
+        //     }
+        //     res.send({ admin });
+        // })
+
+
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+
+            // Insert email if user doesn't exist
+            const query = { email: user.email };
+            const existingUser = await userCollection.findOne(query);
+            if (existingUser) {
+                return res.send({ message: 'User already exists', insertedIs: null })
+            }
+
+            const result = await userCollection.insertOne(user);
+            res.send(result);
+        })
+
+
+        // app.patch('/users/admin/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const filter = { _id: new ObjectId(id) };
+        //     const updatedDoc = {
+        //         $set: {
+        //             role: 'admin'
+        //         }
+        //     }
+        //     const result = await userCollection.updateOne(filter, updatedDoc);
+        //     res.send(result);
+        // })
+
+
+
+        // app.delete('/users/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const query = { _id: new ObjectId(id) }
+        //     const result = await userCollection.deleteOne(query);
+        //     res.send(result);
+        // })
+
+
+        // wishlist collection
+        app.post('/wishlist', async (req, res) => {
+            const wishlistItem = req.body;
+            const result = await wishlistCollection.insertOne(wishlistItem);
+            res.send(result);
+        })
 
 
 
