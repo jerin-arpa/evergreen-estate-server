@@ -36,6 +36,7 @@ async function run() {
         const reviewCollection = client.db("evergreenDb").collection("review");
         const userCollection = client.db("evergreenDb").collection("users");
         const wishlistCollection = client.db("evergreenDb").collection("wishlist");
+        const offeredAmountCollection = client.db("evergreenDb").collection("offeredAmount");
 
 
         // Jwt related API
@@ -258,8 +259,6 @@ async function run() {
 
 
 
-
-
         // Delete user
         app.delete('/users/:id', async (req, res) => {
             const id = req.params.id;
@@ -267,7 +266,6 @@ async function run() {
             const result = await userCollection.deleteOne(query);
             res.send(result);
         })
-
 
 
 
@@ -294,6 +292,23 @@ async function run() {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await wishlistCollection.deleteOne(query);
+            res.send(result);
+        })
+
+
+        // Offered Amount related api
+        // Create Request food data
+        app.post('/offeredAmount', async (req, res) => {
+            const newPropertyReview = req.body;
+            console.log(newPropertyReview);
+            const result = await offeredAmountCollection.insertOne(newPropertyReview);
+            res.send(result);
+        })
+
+        // Read Request Food Data
+        app.get('/offeredAmount', async (req, res) => {
+            const cursor = offeredAmountCollection.find();
+            const result = await cursor.toArray();
             res.send(result);
         })
 
