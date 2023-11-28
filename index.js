@@ -80,20 +80,20 @@ async function run() {
         })
 
 
-        // app.get('/users/admin/:email', async (req, res) => {
-        //     const email = req.params.email;
-        //     if (email !== req.decoded.email) {
-        //         return res.status(403).send({ message: 'Forbidden access' })
-        //     }
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            if (email !== req.decoded.email) {
+                return res.status(403).send({ message: 'Forbidden access' })
+            }
 
-        //     const query = { email: email };
-        //     const user = await userCollection.findOne(query);
-        //     let admin = false;
-        //     if (user) {
-        //         admin = user?.role === 'admin';
-        //     }
-        //     res.send({ admin });
-        // })
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            let admin = false;
+            if (user) {
+                admin = user?.role === 'admin';
+            }
+            res.send({ admin });
+        })
 
 
         app.post('/users', async (req, res) => {
@@ -111,26 +111,68 @@ async function run() {
         })
 
 
-        // app.patch('/users/admin/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const filter = { _id: new ObjectId(id) };
-        //     const updatedDoc = {
-        //         $set: {
-        //             role: 'admin'
-        //         }
-        //     }
-        //     const result = await userCollection.updateOne(filter, updatedDoc);
-        //     res.send(result);
-        // })
+        // API to update user to admin
+        app.patch('/users/admin/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    role: 'admin'
+                }
+            }
+            const result = await userCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
+
+        // API to update user to agent
+        app.patch('/users/agent/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    role: 'agent'
+                }
+            }
+            const result = await userCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
+
+        // API to update user to fraud
+        app.patch('/users/fraud/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+
+            try {
+                // Update user role to 'fraud'
+                const updatedUser = await userCollection.findOneAndUpdate(
+                    filter,
+                    { $set: { role: 'fraud' } },
+                    { returnDocument: 'after' }
+                );
+
+                // Remove properties added by the fraud agent
+                await propertiesCollection.deleteMany({ addedBy: id });
+
+                res.json(updatedUser.value);
+            } catch (error) {
+                console.error('Error updating user to fraud:', error);
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
+        });
 
 
 
-        // app.delete('/users/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const query = { _id: new ObjectId(id) }
-        //     const result = await userCollection.deleteOne(query);
-        //     res.send(result);
-        // })
+        // Delete user
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await userCollection.deleteOne(query);
+            res.send(result);
+        })
+
+
 
 
         // wishlist related api
