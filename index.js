@@ -93,6 +93,34 @@ async function run() {
             res.send(result);
         })
 
+        // update verify button
+        app.patch('/properties/verify/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: 'Verified'
+                }
+            }
+            console.log(updatedDoc)
+            const result = await propertiesCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
+
+        // update reject button
+        app.patch('/properties/reject/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: 'Rejected'
+                }
+            }
+            const result = await propertiesCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
 
 
         // Review related api
@@ -108,6 +136,14 @@ async function run() {
         app.get('/review', async (req, res) => {
             const cursor = reviewCollection.find();
             const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        // Delete Review
+        app.delete('/review/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await reviewCollection.deleteOne(query);
             res.send(result);
         })
 
