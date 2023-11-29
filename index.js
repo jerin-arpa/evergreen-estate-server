@@ -94,6 +94,44 @@ async function run() {
             res.send(result);
         })
 
+
+        // Read one data for update
+        app.get('/properties/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await propertiesCollection.findOne(query);
+            res.send(result);
+        })
+
+        // Update property data
+        app.patch('/properties/:id', async (req, res) => {
+            const item = req.body;
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    propertyTitle: item.propertyTitle,
+                    priceRange: item.priceRange,
+                    location: item.location,
+                    propertyImage: item.propertyImage,
+                    description: item.description,
+                    agentImage: item.agentImage
+                }
+            }
+            const result = await propertiesCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
+
+        // Delete Property data
+        app.delete('/properties/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await propertiesCollection.deleteOne(query);
+            res.send(result);
+        })
+
+
         // update verify button
         app.patch('/properties/verify/:id', async (req, res) => {
             const id = req.params.id;
