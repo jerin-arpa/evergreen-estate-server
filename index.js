@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
@@ -111,11 +112,13 @@ async function run() {
             const updatedDoc = {
                 $set: {
                     propertyTitle: item.propertyTitle,
-                    priceRange: item.priceRange,
+                    minPriceRange: item.minPriceRange,
+                    maxPriceRange: item.maxPriceRange,
                     location: item.location,
                     propertyImage: item.propertyImage,
                     description: item.description,
-                    agentImage: item.agentImage
+                    agentImage: item.agentImage,
+                    role: item.role
                 }
             }
             const result = await propertiesCollection.updateOne(filter, updatedDoc);
@@ -276,23 +279,13 @@ async function run() {
         app.patch('/users/fraud/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
-
-            try {
-                // Update user role to 'fraud'
-                const updatedUser = await userCollection.findOneAndUpdate(
-                    filter,
-                    { $set: { role: 'fraud' } },
-                    { returnDocument: 'after' }
-                );
-
-                // Remove properties added by the fraud agent
-                await propertiesCollection.deleteMany({ addedBy: id });
-
-                res.json(updatedUser.value);
-            } catch (error) {
-                console.error('Error updating user to fraud:', error);
-                res.status(500).json({ error: 'Internal Server Error' });
+            const updatedDoc = {
+                $set: {
+                    role: 'fraud'
+                }
             }
+            const result = await userCollection.updateOne(filter, updatedDoc);
+            res.send(result);
         });
 
 
@@ -351,7 +344,7 @@ async function run() {
         })
 
 
-        // update verify button
+        // update Accept button
         app.patch('/offeredAmount/accepted/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
@@ -378,6 +371,56 @@ async function run() {
             const result = await offeredAmountCollection.updateOne(filter, updatedDoc);
             res.send(result);
         })
+
+
+
+
+        // Payment related api
+        // payment intent
+        // app.post('/create-payment-intent', async (req, res) => {
+        //     const { price } = req.body;
+        //     const amount = parseInt(price * 100);
+        //     console.log(amount, 'amount inside the intent')
+
+        //     const paymentIntent = await stripe.paymentIntents.create({
+        //         amount: amount,
+        //         currency: 'usd',
+        //         payment_method_types: ['card']
+        //     });
+
+        //     res.send({
+        //         clientSecret: paymentIntent.client_secret
+        //     })
+        // });
+
+
+        // app.get('/payments/:email', verifyToken, async (req, res) => {
+        //     const query = { email: req.params.email }
+        //     if (req.params.email !== req.decoded.email) {
+        //         return res.status(403).send({ message: 'forbidden access' });
+        //     }
+        //     const result = await paymentCollection.find(query).toArray();
+        //     res.send(result);
+        // })
+
+
+
+        // app.post('/payments', async (req, res) => {
+        //     const payment = req.body;
+        //     const paymentResult = await paymentCollection.insertOne(payment);
+
+        //     //  carefully delete each item from the cart
+        //     console.log('payment info', payment);
+        //     const query = {
+        //         _id: {
+        //             $in: payment.cartIds.map(id => new ObjectId(id))
+        //         }
+        //     };
+
+        //     const deleteResult = await cartCollection.deleteMany(query);
+
+        //     res.send({ paymentResult, deleteResult });
+        // })
 
 
 
