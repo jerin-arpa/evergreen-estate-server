@@ -38,6 +38,7 @@ async function run() {
         const userCollection = client.db("evergreenDb").collection("users");
         const wishlistCollection = client.db("evergreenDb").collection("wishlist");
         const offeredAmountCollection = client.db("evergreenDb").collection("offeredAmount");
+        const paymentCollection = client.db("bistroDb").collection("payments");
 
 
         // Jwt related API
@@ -394,33 +395,33 @@ async function run() {
         });
 
 
-        // app.get('/payments/:email', verifyToken, async (req, res) => {
-        //     const query = { email: req.params.email }
-        //     if (req.params.email !== req.decoded.email) {
-        //         return res.status(403).send({ message: 'forbidden access' });
-        //     }
-        //     const result = await paymentCollection.find(query).toArray();
-        //     res.send(result);
-        // })
+        app.get('/payments/:email', verifyToken, async (req, res) => {
+            const query = { email: req.params.email }
+            if (req.params.email !== req.decoded.email) {
+                return res.status(403).send({ message: 'forbidden access' });
+            }
+            const result = await paymentCollection.find(query).toArray();
+            res.send(result);
+        })
 
 
 
-        // app.post('/payments', async (req, res) => {
-        //     const payment = req.body;
-        //     const paymentResult = await paymentCollection.insertOne(payment);
+        app.post('/payments', async (req, res) => {
+            const payment = req.body;
+            const paymentResult = await paymentCollection.insertOne(payment);
 
-        //     //  carefully delete each item from the cart
-        //     console.log('payment info', payment);
-        //     const query = {
-        //         _id: {
-        //             $in: payment.cartIds.map(id => new ObjectId(id))
-        //         }
-        //     };
+            //  carefully delete each item from the cart
+            console.log('payment info', payment);
+            const query = {
+                _id: {
+                    $in: payment.cartIds.map(id => new ObjectId(id))
+                }
+            };
 
-        //     const deleteResult = await cartCollection.deleteMany(query);
+            const deleteResult = await offeredAmountCollection.deleteMany(query);
 
-        //     res.send({ paymentResult, deleteResult });
-        // })
+            res.send({ paymentResult, deleteResult });
+        })
 
 
 
