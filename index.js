@@ -351,6 +351,35 @@ async function run() {
         })
 
 
+        // update verify button
+        app.patch('/offeredAmount/accepted/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: 'Accepted'
+                }
+            }
+            console.log(updatedDoc)
+            const result = await offeredAmountCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
+
+        // update reject button
+        app.patch('/offeredAmount/reject/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: 'Rejected'
+                }
+            }
+            const result = await offeredAmountCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
+
 
         // Send a ping to confirm a successful connection
         // await client.db("admin").command({ ping: 1 });
