@@ -38,7 +38,7 @@ async function run() {
         const userCollection = client.db("evergreenDb").collection("users");
         const wishlistCollection = client.db("evergreenDb").collection("wishlist");
         const offeredAmountCollection = client.db("evergreenDb").collection("offeredAmount");
-        const paymentCollection = client.db("bistroDb").collection("payments");
+        const paymentCollection = client.db("evergreenDb").collection("payments");
 
 
         // Jwt related API
@@ -200,6 +200,7 @@ async function run() {
 
         // Admin
         app.get('/users/admin/:email', verifyToken, async (req, res) => {
+            m
             const email = req.params.email;
             if (email !== req.decoded.email) {
                 return res.status(403).send({ message: 'Forbidden access' })
@@ -412,15 +413,25 @@ async function run() {
 
             //  carefully delete each item from the cart
             console.log('payment info', payment);
-            const query = {
-                _id: {
-                    $in: payment.cartIds.map(id => new ObjectId(id))
+            const query = { _id: new ObjectId(payment.amountIds) };
+            const updatedDoc = {
+                $set: {
+                    status: 'Bought',
+                    transactionId: payment.transactionId,
                 }
-            };
+            }
+            console.log(updatedDoc)
 
-            const deleteResult = await offeredAmountCollection.deleteMany(query);
+            const result = await offeredAmountCollection.updateOne(query, updatedDoc);
 
-            res.send({ paymentResult, deleteResult });
+
+            res.send({ paymentResult, result });
+        })
+
+
+        app.get('/payments', async (req, res) => {
+            const result = await paymentCollection.find().toArray();
+            res.send(result);
         })
 
 
