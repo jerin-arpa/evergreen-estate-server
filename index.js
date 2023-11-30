@@ -200,7 +200,6 @@ async function run() {
 
         // Admin
         app.get('/users/admin/:email', verifyToken, async (req, res) => {
-            m
             const email = req.params.email;
             if (email !== req.decoded.email) {
                 return res.status(403).send({ message: 'Forbidden access' })
