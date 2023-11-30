@@ -165,6 +165,36 @@ async function run() {
         })
 
 
+        // Update advertise button
+        app.patch('/properties/verifiedAdvertise/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    advertiseStatus: 'Verified'
+                }
+            }
+            console.log(updatedDoc)
+            const result = await propertiesCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
+
+        // Remove advertise button
+        app.patch('/properties/removedAdvertise/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    advertiseStatus: 'Removed'
+                }
+            }
+            console.log(updatedDoc)
+            const result = await propertiesCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
+
 
         // Review related api
         // Create Request food data
